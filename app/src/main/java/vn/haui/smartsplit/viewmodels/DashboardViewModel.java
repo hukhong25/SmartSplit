@@ -74,9 +74,7 @@ public class DashboardViewModel extends ViewModel {
             boolean isSettlement = exp.isSettlement();
 
             if (!Expense.STATUS_COMPLETED.equals(status)) {
-                if (!(isSettlement && Expense.STATUS_PENDING.equals(status))) {
-                    continue;
-                }
+                continue;
             }
 
             String groupId = exp.getGroupId();
