@@ -72,6 +72,20 @@ public class StatsViewModel extends ViewModel {
         int thisMonth = now.get(Calendar.MONTH);
         int thisYear  = now.get(Calendar.YEAR);
 
+        // Prep for week filtering (Start of the current week - Monday)
+        long startOfWeekMillis = 0;
+        if (selectedPeriod == 0) {
+            Calendar sw = (Calendar) now.clone();
+            sw.set(Calendar.HOUR_OF_DAY, 0);
+            sw.set(Calendar.MINUTE, 0);
+            sw.set(Calendar.SECOND, 0);
+            sw.set(Calendar.MILLISECOND, 0);
+            int dayOfWeek = sw.get(Calendar.DAY_OF_WEEK);
+            int diff = (dayOfWeek == Calendar.SUNDAY) ? 6 : (dayOfWeek - Calendar.MONDAY);
+            sw.add(Calendar.DAY_OF_MONTH, -diff);
+            startOfWeekMillis = sw.getTimeInMillis();
+        }
+
         for (Expense exp : expenses) {
             if (!Expense.STATUS_COMPLETED.equals(exp.getStatus())) continue;
             if (exp.isSettlement()) continue;
@@ -104,8 +118,7 @@ public class StatsViewModel extends ViewModel {
             // Filter by period
             boolean inPeriod;
             if (selectedPeriod == 0) { // week
-                long diffMs = now.getTimeInMillis() - timestamp;
-                inPeriod = diffMs >= 0 && diffMs <= 7L * 24 * 3600 * 1000;
+                inPeriod = timestamp >= startOfWeekMillis;
             } else if (selectedPeriod == 1) { // month
                 inPeriod = (expMonth == thisMonth && expYear == thisYear);
             } else { // year
