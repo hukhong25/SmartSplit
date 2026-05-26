@@ -15,12 +15,15 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.chip.ChipGroup;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import vn.haui.smartsplit.R;
+import vn.haui.smartsplit.models.Expense;
+import vn.haui.smartsplit.utils.ReportUtils;
 import vn.haui.smartsplit.viewmodels.StatsViewModel;
 import vn.haui.smartsplit.views.DonutChartView;
 
@@ -32,6 +35,7 @@ public class StatsFragment extends Fragment {
     private TextView tvBarLastMonthAmount, tvBarThisMonthAmount;
     private View barLastMonth, barThisMonth;
     private ChipGroup chipGroupPeriod;
+    private View btnExport;
     private StatsViewModel viewModel;
 
     private static final int[] CAT_COLORS = {
@@ -69,6 +73,7 @@ public class StatsFragment extends Fragment {
         barLastMonth        = view.findViewById(R.id.barLastMonth);
         barThisMonth        = view.findViewById(R.id.barThisMonth);
         chipGroupPeriod     = view.findViewById(R.id.chipGroupPeriod);
+        btnExport           = view.findViewById(R.id.btnExportPersonalReport);
 
         setupUI();
         observeViewModel();
@@ -85,6 +90,23 @@ public class StatsFragment extends Fragment {
             else if (id == R.id.chipMonth)  period = 1;
             else if (id == R.id.chipYear)   period = 2;
             viewModel.loadStats(period);
+        });
+
+        btnExport.setOnClickListener(v -> {
+            String uid = viewModel.getCurrentUid();
+            if (uid == null) return;
+
+            String name = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+            if (name == null || name.isEmpty()) name = getString(R.string.default_username);
+
+            List<Expense> expenses = viewModel.getRawExpenses().getValue();
+            Integer period = viewModel.getSelectedPeriod().getValue();
+
+            if (expenses != null && period != null) {
+                ReportUtils.exportPersonalReportToCSV(requireContext(), uid, name, expenses, period);
+            } else {
+                Toast.makeText(requireContext(), getString(R.string.no_notifications_msg), Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

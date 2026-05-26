@@ -14,4 +14,8 @@
         android:id="@+id/action_group_settings"
         android:title="@string/action_group_settings"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_export_report"
+        android:title="@string/action_export_report"
+        app:showAsAction="never" />
 </menu>

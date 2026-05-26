@@ -20,6 +20,8 @@ public class StatsViewModel extends ViewModel {
 
     private final MutableLiveData<StatsData> statsData = new MutableLiveData<>();
     private final MutableLiveData<String> error = new MutableLiveData<>();
+    private final MutableLiveData<List<Expense>> rawExpenses = new MutableLiveData<>();
+    private final MutableLiveData<Integer> selectedPeriod = new MutableLiveData<>(1);
     private ListenerRegistration expensesListener;
 
     public static class StatsData {
@@ -36,8 +38,12 @@ public class StatsViewModel extends ViewModel {
 
     public LiveData<StatsData> getStatsData() { return statsData; }
     public LiveData<String> getError() { return error; }
+    public LiveData<List<Expense>> getRawExpenses() { return rawExpenses; }
+    public LiveData<Integer> getSelectedPeriod() { return selectedPeriod; }
+    public String getCurrentUid() { return mAuth.getUid(); }
 
-    public void loadStats(int selectedPeriod) {
+    public void loadStats(int period) {
+        selectedPeriod.setValue(period);
         String uid = mAuth.getUid();
         if (uid == null) return;
 
@@ -46,7 +52,8 @@ public class StatsViewModel extends ViewModel {
         expensesListener = expenseRepository.getAllExpenses(new ExpenseRepository.OnExpensesLoadedListener() {
             @Override
             public void onLoaded(List<Expense> expenses) {
-                processStats(expenses, uid, selectedPeriod);
+                rawExpenses.setValue(expenses);
+                processStats(expenses, uid, period);
             }
 
             @Override
@@ -108,15 +115,28 @@ public class StatsViewModel extends ViewModel {
             if (!inPeriod) continue;
 
             // Categorize
-            int catIdx = getCategoryIndex(exp.getDescription());
+            int catIdx = getCategoryIndex(exp);
             catTotals[catIdx] += userShare;
         }
 
         statsData.setValue(new StatsData(catTotals, totalThisMonth, totalLastMonth));
     }
 
-    private int getCategoryIndex(String description) {
-        String desc = description != null ? description.toLowerCase() : "";
+    private int getCategoryIndex(Expense exp) {
+        String category = exp.getCategory();
+        if (category != null) {
+            switch (category.toUpperCase()) {
+                case "FOOD": return 0;
+                case "TRAVEL": return 1;
+                case "SHOPPING": return 2;
+                case "ENTERTAINMENT": return 3;
+                case "OTHER":
+                    break;
+            }
+        }
+
+        // Fallback for legacy database records
+        String desc = exp.getDescription() != null ? exp.getDescription().toLowerCase() : "";
         if (desc.contains("ăn") || desc.contains("uống") || desc.contains("cà phê") || desc.contains("food")) return 0;
         if (desc.contains("xe") || desc.contains("grab") || desc.contains("vé") || desc.contains("travel")) return 1;
         if (desc.contains("mua") || desc.contains("shop") || desc.contains("quần") || desc.contains("áo")) return 2;

@@ -23,7 +23,7 @@ public class Expense {
     public Expense() {
         this.status = STATUS_COMPLETED;
         this.isSettlement = false;
-        this.category = "Khác";
+        this.category = "OTHER";
     }
 
     public String getId() { return id; }

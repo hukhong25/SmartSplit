@@ -27,6 +27,7 @@ import vn.haui.smartsplit.adapters.GroupExpenseAdapter;
 import vn.haui.smartsplit.models.AppNotification;
 import vn.haui.smartsplit.models.Expense;
 import vn.haui.smartsplit.models.User;
+import vn.haui.smartsplit.utils.ReportUtils;
 import vn.haui.smartsplit.viewmodels.GroupDetailsViewModel;
 
 public class GroupDetailsActivity extends BaseActivity implements
@@ -110,7 +111,12 @@ public class GroupDetailsActivity extends BaseActivity implements
         });
 
         viewModel.getError().observe(this, error -> {
-            if (error != null) Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+            if (error != null) {
+                Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                if ("Group not found".equals(error)) {
+                    finish();
+                }
+            }
         });
     }
 
@@ -227,6 +233,10 @@ public class GroupDetailsActivity extends BaseActivity implements
             startActivity(intent);
             return true;
         }
+        if (id == R.id.action_export_report) {
+            exportReport();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -238,5 +248,15 @@ public class GroupDetailsActivity extends BaseActivity implements
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, message);
         startActivity(Intent.createChooser(intent, getString(R.string.share_chooser_title)));
+    }
+
+    private void exportReport() {
+        ReportUtils.exportGroupReportToCSV(
+                this,
+                viewModel.getGroup().getValue(),
+                viewModel.getExpenses().getValue(),
+                viewModel.getMembers().getValue(),
+                viewModel.getBalances().getValue()
+        );
     }
 }

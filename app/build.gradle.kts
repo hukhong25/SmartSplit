@@ -45,8 +45,7 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
-    implementation(libs.firebase.storage)
-    
+
     // Image loading
     implementation("com.github.bumptech.glide:glide:4.16.0")
 

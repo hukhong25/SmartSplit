@@ -341,4 +341,6 @@
     <string name="dialog_share_join_code_msg_format">Share this code with friends: %1$s</string>
     <string name="dialog_remove_member_msg_format">Remove %1$s from the group?</string>
     <string name="dialog_transfer_admin_msg_format">Are you sure you want to transfer the Group Admin role to %1$s?\n(After transferring, you will become a regular member)</string>
+    <string name="action_export_report">Export report (CSV)</string>
+    <string name="toast_export_failed">Failed to export report</string>
 </resources>

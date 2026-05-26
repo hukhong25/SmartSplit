@@ -340,4 +340,22 @@
     <string name="dialog_share_join_code_msg_format">Chia sẻ mã này cho bạn bè: %1$s</string>
     <string name="dialog_remove_member_msg_format">Xóa %1$s khỏi nhóm?</string>
     <string name="dialog_transfer_admin_msg_format">Bạn có chắc chắn muốn nhượng quyền Trưởng nhóm cho %1$s không?\n(Sau khi nhượng quyền, bạn sẽ trở thành Thành viên thông thường)</string>
+    <string name="action_export_report">Xuất báo cáo chi tiêu (CSV)</string>
+    <string name="toast_export_failed">Xuất báo cáo thất bại</string>
+
+    <!-- Báo cáo chi tiêu -->
+    <string name="report_personal_header_name">BÁO CÁO CHI TIÊU CÁ NHÂN</string>
+    <string name="report_personal_header_period">KỲ BÁO CÁO</string>
+    <string name="report_personal_header_export_date">NGÀY XUẤT BÁO CÁO</string>
+    <string name="report_personal_section_summary">TỔNG QUAN THEO DANH MỤC</string>
+    <string name="report_col_category">Danh mục</string>
+    <string name="report_col_amount">Số tiền</string>
+    <string name="report_col_percent">Tỷ lệ</string>
+    <string name="report_col_total">TỔNG CỘNG</string>
+    <string name="report_personal_section_detail">CHI TIẾT CÁC KHOẢN CHI</string>
+    <string name="report_col_description">Mô tả</string>
+    <string name="report_col_payer">Người trả</string>
+    <string name="report_col_your_share">Phần của bạn</string>
+    <string name="report_col_time">Thời gian</string>
+    <string name="action_export_personal_report">Xuất báo cáo cá nhân</string>
 </resources>

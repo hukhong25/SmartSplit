@@ -120,6 +120,7 @@ public class AddGroupExpenseViewModel extends ViewModel {
         expense.setSplitDetails(splitDetails);
         expense.setStatus(Expense.STATUS_COMPLETED);
         expense.setSettlement(false);
+        expense.setCategory(deduceCategory(desc));
 
         expenseRepository.saveExpense(expense)
                 .addOnSuccessListener(aVoid -> {
@@ -131,6 +132,15 @@ public class AddGroupExpenseViewModel extends ViewModel {
                     isLoading.setValue(false);
                     error.setValue(e.getMessage());
                 });
+    }
+
+    private String deduceCategory(String description) {
+        String desc = description != null ? description.toLowerCase() : "";
+        if (desc.contains("ăn") || desc.contains("uống") || desc.contains("cà phê") || desc.contains("food")) return "FOOD";
+        if (desc.contains("xe") || desc.contains("grab") || desc.contains("vé") || desc.contains("travel")) return "TRAVEL";
+        if (desc.contains("mua") || desc.contains("shop") || desc.contains("quần") || desc.contains("áo")) return "SHOPPING";
+        if (desc.contains("phim") || desc.contains("game") || desc.contains("giải trí")) return "ENTERTAINMENT";
+        return "OTHER";
     }
 
     private void notifyMembers(Expense expense, String currentUid) {

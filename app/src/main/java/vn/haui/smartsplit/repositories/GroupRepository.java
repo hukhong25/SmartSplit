@@ -83,7 +83,7 @@ public class GroupRepository {
     }
 
     public Task<Void> dissolveGroup(String groupId) {
-        return db.collection("groups").document(groupId).update("memberIds", new ArrayList<String>());
+        return db.collection("groups").document(groupId).delete();
     }
 
     public Task<Void> addMember(String groupId, String uid) {

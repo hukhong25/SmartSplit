@@ -14,12 +14,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import vn.haui.smartsplit.models.Group;
 import vn.haui.smartsplit.models.User;
+import vn.haui.smartsplit.repositories.ExpenseRepository;
 import vn.haui.smartsplit.repositories.GroupRepository;
 import vn.haui.smartsplit.repositories.UserRepository;
 
 public class GroupMembersViewModel extends ViewModel {
     private final GroupRepository groupRepository = new GroupRepository();
     private final UserRepository userRepository = new UserRepository();
+    private final ExpenseRepository expenseRepository = new ExpenseRepository();
     private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     private final MutableLiveData<Group> group = new MutableLiveData<>();
@@ -159,6 +161,7 @@ public class GroupMembersViewModel extends ViewModel {
         isLoading.setValue(true);
         groupRepository.dissolveGroup(currentGroup.getId())
                 .addOnSuccessListener(aVoid -> {
+                    expenseRepository.deleteExpensesByGroup(currentGroup.getId());
                     isLoading.setValue(false);
                     dissolveSuccess.setValue(true);
                 })

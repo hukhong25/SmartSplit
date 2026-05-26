@@ -114,4 +114,19 @@ public class ExpenseRepository {
     public Task<Void> deleteExpense(String expenseId) {
         return db.collection("expenses").document(expenseId).delete();
     }
+
+    public void deleteExpensesByGroup(String groupId) {
+        db.collection("expenses")
+                .whereEqualTo("groupId", groupId)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    if (snapshots != null && !snapshots.isEmpty()) {
+                        com.google.firebase.firestore.WriteBatch batch = db.batch();
+                        for (QueryDocumentSnapshot doc : snapshots) {
+                            batch.delete(doc.getReference());
+                        }
+                        batch.commit();
+                    }
+                });
+    }
 }

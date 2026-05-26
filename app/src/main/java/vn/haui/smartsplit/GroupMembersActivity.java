@@ -110,6 +110,9 @@ public class GroupMembersActivity extends BaseActivity {
         viewModel.getError().observe(this, err -> {
             if (err != null) {
                 Toast.makeText(this, getString(R.string.toast_error_prefix, err), Toast.LENGTH_SHORT).show();
+                if ("Group not found".equals(err)) {
+                    finish();
+                }
             }
         });
 
