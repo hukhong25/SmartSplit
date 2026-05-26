@@ -358,4 +358,6 @@
     <string name="report_col_your_share">Phần của bạn</string>
     <string name="report_col_time">Thời gian</string>
     <string name="action_export_personal_report">Xuất báo cáo cá nhân</string>
+    <string name="select_all">Tất cả</string>
+    <string name="error_invalid_email">Định dạng email không hợp lệ</string>
 </resources>

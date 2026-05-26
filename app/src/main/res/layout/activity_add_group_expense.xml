@@ -38,6 +38,60 @@
                     android:textColor="@color/colorPrimary"
                     android:layout_marginBottom="24dp" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Danh mục"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="8dp" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none"
+                    android:layout_marginBottom="16dp">
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/cgCategories"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleSelection="true"
+                        app:selectionRequired="true">
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFood"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cat_food"
+                            android:checked="true" />
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipTravel"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cat_travel" />
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipShopping"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cat_shopping" />
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipEntertainment"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cat_entertainment" />
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipOther"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cat_other" />
+                    </com.google.android.material.chip.ChipGroup>
+                </HorizontalScrollView>
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -55,14 +109,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    app:suffixText="VND">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etExpenseAmount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/amount_label"
-                        android:inputType="numberDecimal"/>
+                        android:inputType="number"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -82,14 +137,31 @@
                     android:background="@android:drawable/btn_dropdown"
                     android:layout_marginBottom="24dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/split_with_label"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333"
-                    android:layout_marginBottom="8dp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/split_with_label"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#333333" />
+
+                    <CheckBox
+                        android:id="@+id/cbSelectAll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/select_all"
+                        android:checked="true"
+                        android:textSize="14sp"
+                        android:textColor="@color/textSecondary" />
+                </LinearLayout>
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"

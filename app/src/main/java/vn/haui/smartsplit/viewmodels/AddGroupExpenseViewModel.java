@@ -17,6 +17,7 @@ import vn.haui.smartsplit.repositories.ExpenseRepository;
 import vn.haui.smartsplit.repositories.GroupRepository;
 import vn.haui.smartsplit.repositories.NotificationRepository;
 import vn.haui.smartsplit.repositories.UserRepository;
+import vn.haui.smartsplit.utils.CategoryUtils;
 
 public class AddGroupExpenseViewModel extends ViewModel {
     private final GroupRepository groupRepository = new GroupRepository();
@@ -101,11 +102,10 @@ public class AddGroupExpenseViewModel extends ViewModel {
         });
     }
 
-    public void saveExpense(String id, String desc, double amount, User payer, String groupId, List<String> selectedUserIds, String currentUid) {
+    public void saveExpense(String id, String desc, double amount, User payer, String groupId, List<String> selectedUserIds, String currentUid, String category) {
         isLoading.setValue(true);
         double share = amount / selectedUserIds.size();
         
-        // Khai báo Map<String, Object> để khớp với model Expense
         Map<String, Object> splitDetails = new HashMap<>();
         for (String uid : selectedUserIds) splitDetails.put(uid, share);
 
@@ -120,7 +120,7 @@ public class AddGroupExpenseViewModel extends ViewModel {
         expense.setSplitDetails(splitDetails);
         expense.setStatus(Expense.STATUS_COMPLETED);
         expense.setSettlement(false);
-        expense.setCategory(deduceCategory(desc));
+        expense.setCategory(category != null ? category : CategoryUtils.deduceCategory(desc));
 
         expenseRepository.saveExpense(expense)
                 .addOnSuccessListener(aVoid -> {
@@ -132,15 +132,6 @@ public class AddGroupExpenseViewModel extends ViewModel {
                     isLoading.setValue(false);
                     error.setValue(e.getMessage());
                 });
-    }
-
-    private String deduceCategory(String description) {
-        String desc = description != null ? description.toLowerCase() : "";
-        if (desc.contains("ăn") || desc.contains("uống") || desc.contains("cà phê") || desc.contains("food")) return "FOOD";
-        if (desc.contains("xe") || desc.contains("grab") || desc.contains("vé") || desc.contains("travel")) return "TRAVEL";
-        if (desc.contains("mua") || desc.contains("shop") || desc.contains("quần") || desc.contains("áo")) return "SHOPPING";
-        if (desc.contains("phim") || desc.contains("game") || desc.contains("giải trí")) return "ENTERTAINMENT";
-        return "OTHER";
     }
 
     private void notifyMembers(Expense expense, String currentUid) {
