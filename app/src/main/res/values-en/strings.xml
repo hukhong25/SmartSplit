@@ -54,9 +54,9 @@
     <string name="register_now_action">Register now</string>
     <string name="notifications_title">Notifications</string>
     <string name="no_notifications_msg">No new notifications</string>
-    <string name="register_title">Tạo tài khoản</string>
-    <string name="register_subtitle">Tham gia SmartSplit ngay hôm nay</string>
-    <string name="full_name_hint">Họ và tên</string>
+    <string name="register_title">Create Account</string>
+    <string name="register_subtitle">Join SmartSplit today</string>
+    <string name="full_name_hint">Full Name</string>
     <string name="proof_image_label">Proof photo:</string>
     <string name="proof_image_desc">Payment proof image</string>
     <string name="reject_btn">Reject</string>
@@ -343,4 +343,37 @@
     <string name="dialog_transfer_admin_msg_format">Are you sure you want to transfer the Group Admin role to %1$s?\n(After transferring, you will become a regular member)</string>
     <string name="action_export_report">Export report (CSV)</string>
     <string name="toast_export_failed">Failed to export report</string>
+
+    <!-- Expense Reports -->
+    <string name="report_personal_header_name">PERSONAL SPENDING REPORT</string>
+    <string name="report_personal_header_period">REPORT PERIOD</string>
+    <string name="report_personal_header_export_date">EXPORT DATE</string>
+    <string name="report_personal_section_summary">SUMMARY BY CATEGORY</string>
+    <string name="report_col_category">Category</string>
+    <string name="report_col_amount">Amount</string>
+    <string name="report_col_percent">Percentage</string>
+    <string name="report_col_total">TOTAL</string>
+    <string name="report_personal_section_detail">EXPENSE DETAILS</string>
+    <string name="report_col_description">Description</string>
+    <string name="report_col_payer">Payer</string>
+    <string name="report_col_your_share">Your Share</string>
+    <string name="report_col_time">Time</string>
+    <string name="action_export_personal_report">Export Personal Report</string>
+    <string name="select_all">All</string>
+    <string name="error_invalid_email">Invalid email format</string>
+
+    <string name="report_group_name_label">GROUP NAME</string>
+    <string name="report_group_code_label">GROUP CODE</string>
+    <string name="report_transaction_history_title">TRANSACTION HISTORY</string>
+    <string name="report_col_type">Type</string>
+    <string name="report_col_status">Status</string>
+    <string name="report_type_settlement">Settlement</string>
+    <string name="report_type_expense">Expense</string>
+    <string name="report_status_pending">Pending</string>
+    <string name="report_status_rejected">Rejected</string>
+    <string name="report_status_completed">Completed</string>
+    <string name="report_member_balances_title">MEMBER BALANCES</string>
+    <string name="report_col_member">Member</string>
+    <string name="report_col_email">Email</string>
+    <string name="report_col_balance">Balance</string>
 </resources>

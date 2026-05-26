@@ -17,6 +17,7 @@ import java.util.Locale;
 
 import vn.haui.smartsplit.R;
 import vn.haui.smartsplit.models.AppNotification;
+import vn.haui.smartsplit.utils.NotificationLocalizer;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
 
@@ -43,8 +44,14 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     @Override
     public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
         AppNotification notification = notificationList.get(position);
-        holder.tvTitle.setText(notification.getTitle());
-        holder.tvContent.setText(notification.getContent());
+        NotificationLocalizer.LocalizedResult localized = NotificationLocalizer.localize(
+                holder.itemView.getContext(),
+                notification.getType(),
+                notification.getTitle(),
+                notification.getContent()
+        );
+        holder.tvTitle.setText(localized.title);
+        holder.tvContent.setText(localized.content);
         holder.tvTime.setText(DATE_FORMAT.format(new Date(notification.getTimestamp())));
 
         if (!notification.isRead()) {

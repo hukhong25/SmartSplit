@@ -102,7 +102,7 @@ public class AddGroupExpenseViewModel extends ViewModel {
         });
     }
 
-    public void saveExpense(String id, String desc, double amount, User payer, String groupId, List<String> selectedUserIds, String currentUid, String category) {
+    public void saveExpense(String id, String desc, double amount, User payer, String groupId, List<String> selectedUserIds, String currentUid, String category, String notifTitle, String notifContentFormat) {
         isLoading.setValue(true);
         double share = amount / selectedUserIds.size();
         
@@ -124,7 +124,7 @@ public class AddGroupExpenseViewModel extends ViewModel {
 
         expenseRepository.saveExpense(expense)
                 .addOnSuccessListener(aVoid -> {
-                    notifyMembers(expense, currentUid);
+                    notifyMembers(expense, currentUid, notifTitle, notifContentFormat);
                     saveSuccess.setValue(true);
                     isLoading.setValue(false);
                 })
@@ -134,9 +134,8 @@ public class AddGroupExpenseViewModel extends ViewModel {
                 });
     }
 
-    private void notifyMembers(Expense expense, String currentUid) {
-        String title = "Chi tiêu mới";
-        String content = expense.getPayerName() + " đã thêm: " + expense.getDescription() + " (" + (long)expense.getAmount() + " VND)";
+    private void notifyMembers(Expense expense, String currentUid, String title, String contentFormat) {
+        String content = String.format(contentFormat, expense.getPayerName(), expense.getDescription(), (long) expense.getAmount());
 
         if (expense.getSplitDetails() != null) {
             for (String uid : expense.getSplitDetails().keySet()) {

@@ -290,7 +290,9 @@ public class AddGroupExpenseActivity extends BaseActivity {
             String id = isEditMode ? expenseId : FirebaseFirestore.getInstance().collection("expenses").document().getId();
             String category = getSelectedCategory();
             
-            viewModel.saveExpense(id, desc, amount, payer, groupId, selectedUserIds, FirebaseAuth.getInstance().getUid(), category);
+            viewModel.saveExpense(id, desc, amount, payer, groupId, selectedUserIds, FirebaseAuth.getInstance().getUid(), category,
+                    getString(R.string.notif_title_new_expense),
+                    getString(R.string.notif_content_new_expense_format));
         } catch (NumberFormatException e) {
             Toast.makeText(this, getString(R.string.toast_invalid_amount), Toast.LENGTH_SHORT).show();
         }

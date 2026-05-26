@@ -35,17 +35,22 @@ public class ReportUtils {
             StringBuilder csv = new StringBuilder();
             csv.append('\ufeff');
 
-            csv.append("TÊN NHÓM (GROUP NAME),").append(group.getName()).append("\n");
-            csv.append("MÃ NHÓM (GROUP CODE),").append(group.getJoinCode()).append("\n");
+            csv.append(context.getString(R.string.report_group_name_label)).append(",").append(group.getName()).append("\n");
+            csv.append(context.getString(R.string.report_group_code_label)).append(",").append(group.getJoinCode()).append("\n");
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-            csv.append("NGÀY XUẤT BÁO CÁO (EXPORT DATE),").append(sdf.format(new Date())).append("\n\n");
+            csv.append(context.getString(R.string.report_personal_header_export_date)).append(",").append(sdf.format(new Date())).append("\n\n");
 
-            csv.append("DANH SÁCH CHI TIÊU VÀ TẤT TOÁN (TRANSACTION HISTORY)\n");
-            csv.append("Mô tả (Description),Số tiền (Amount),Người trả (Payer),Thời gian (Time),Loại giao dịch (Type),Trạng thái (Status)\n");
+            csv.append(context.getString(R.string.report_transaction_history_title)).append("\n");
+            csv.append(context.getString(R.string.report_col_description)).append(",")
+               .append(context.getString(R.string.report_col_amount)).append(",")
+               .append(context.getString(R.string.report_col_payer)).append(",")
+               .append(context.getString(R.string.report_col_time)).append(",")
+               .append(context.getString(R.string.report_col_type)).append(",")
+               .append(context.getString(R.string.report_col_status)).append("\n");
 
             for (Expense exp : expenses) {
-                String type = exp.isSettlement() ? "Tất toán (Settlement)" : "Khoản chi (Expense)";
-                String status = getStatusLabel(exp.getStatus());
+                String type = exp.isSettlement() ? context.getString(R.string.report_type_settlement) : context.getString(R.string.report_type_expense);
+                String status = getStatusLabel(context, exp.getStatus());
 
                 csv.append(escapeCSV(exp.getDescription())).append(",")
                    .append(exp.getAmount()).append(",")
@@ -56,8 +61,10 @@ public class ReportUtils {
             }
             csv.append("\n");
 
-            csv.append("CHI TIẾT SỐ DƯ THÀNH VIÊN (MEMBER BALANCES)\n");
-            csv.append("Thành viên (Member),Email,Số dư (Balance)\n");
+            csv.append(context.getString(R.string.report_member_balances_title)).append("\n");
+            csv.append(context.getString(R.string.report_col_member)).append(",")
+               .append(context.getString(R.string.report_col_email)).append(",")
+               .append(context.getString(R.string.report_col_balance)).append("\n");
 
             DecimalFormat df = new DecimalFormat("#,###");
             Map<String, User> userMap = new HashMap<>();
@@ -173,10 +180,10 @@ public class ReportUtils {
         context.startActivity(Intent.createChooser(intent, context.getString(chooserTitleRes)));
     }
 
-    private static String getStatusLabel(String status) {
-        if ("PENDING".equals(status)) return "Chờ xác nhận (Pending)";
-        if ("REJECTED".equals(status)) return "Bị từ chối (Rejected)";
-        return "Hoàn thành (Completed)";
+    private static String getStatusLabel(Context context, String status) {
+        if ("PENDING".equals(status)) return context.getString(R.string.report_status_pending);
+        if ("REJECTED".equals(status)) return context.getString(R.string.report_status_rejected);
+        return context.getString(R.string.report_status_completed);
     }
 
     private static long getStartTimeFromPeriod(int period) {

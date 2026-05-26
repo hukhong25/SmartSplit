@@ -360,4 +360,19 @@
     <string name="action_export_personal_report">Xuất báo cáo cá nhân</string>
     <string name="select_all">Tất cả</string>
     <string name="error_invalid_email">Định dạng email không hợp lệ</string>
+
+    <string name="report_group_name_label">TÊN NHÓM</string>
+    <string name="report_group_code_label">MÃ NHÓM</string>
+    <string name="report_transaction_history_title">DANH SÁCH CHI TIÊU VÀ TẤT TOÁN</string>
+    <string name="report_col_type">Loại giao dịch</string>
+    <string name="report_col_status">Trạng thái</string>
+    <string name="report_type_settlement">Tất toán</string>
+    <string name="report_type_expense">Khoản chi</string>
+    <string name="report_status_pending">Chờ xác nhận</string>
+    <string name="report_status_rejected">Bị từ chối</string>
+    <string name="report_status_completed">Hoàn thành</string>
+    <string name="report_member_balances_title">CHI TIẾT SỐ DƯ THÀNH VIÊN</string>
+    <string name="report_col_member">Thành viên</string>
+    <string name="report_col_email">Email</string>
+    <string name="report_col_balance">Số dư</string>
 </resources>
