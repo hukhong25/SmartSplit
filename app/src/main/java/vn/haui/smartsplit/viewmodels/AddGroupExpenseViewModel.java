@@ -102,7 +102,7 @@ public class AddGroupExpenseViewModel extends ViewModel {
         });
     }
 
-    public void saveExpense(String id, String desc, double amount, User payer, String groupId, List<String> selectedUserIds, String currentUid, String category, String notifTitle, String notifContentFormat) {
+    public void saveExpense(String id, String desc, double amount, User payer, String groupId, List<String> selectedUserIds, String currentUid, String category, String proofImageUrl, String notifTitle, String notifContentFormat) {
         isLoading.setValue(true);
         double share = amount / selectedUserIds.size();
         
@@ -121,6 +121,7 @@ public class AddGroupExpenseViewModel extends ViewModel {
         expense.setStatus(Expense.STATUS_COMPLETED);
         expense.setSettlement(false);
         expense.setCategory(category != null ? category : CategoryUtils.deduceCategory(desc));
+        expense.setProofImageUrl(proofImageUrl);
 
         expenseRepository.saveExpense(expense)
                 .addOnSuccessListener(aVoid -> {

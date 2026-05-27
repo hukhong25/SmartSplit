@@ -26,6 +26,8 @@ public class DashboardViewModel extends ViewModel {
     private final MutableLiveData<Double> totalOwe = new MutableLiveData<>(0.0);
     private final MutableLiveData<Double> totalOwed = new MutableLiveData<>(0.0);
     private final MutableLiveData<String> error = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> joinSuccess = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isJoining = new MutableLiveData<>(false);
 
     private ListenerRegistration groupsListener;
     private ListenerRegistration expensesListener;
@@ -34,6 +36,8 @@ public class DashboardViewModel extends ViewModel {
     public LiveData<Double> getTotalOwe() { return totalOwe; }
     public LiveData<Double> getTotalOwed() { return totalOwed; }
     public LiveData<String> getError() { return error; }
+    public LiveData<Boolean> getJoinSuccess() { return joinSuccess; }
+    public LiveData<Boolean> getIsJoining() { return isJoining; }
 
     public void startListening() {
         String uid = mAuth.getUid();
@@ -120,17 +124,25 @@ public class DashboardViewModel extends ViewModel {
         String uid = mAuth.getUid();
         if (uid == null) return;
 
+        isJoining.setValue(true);
         groupRepository.joinGroupWithCode(code, uid, new GroupRepository.OnActionListener() {
             @Override
             public void onSuccess() {
-                // UI updated via listeners
+                joinSuccess.setValue(true);
+                isJoining.setValue(false);
             }
 
             @Override
             public void onError(Exception e) {
                 error.setValue(e.getMessage());
+                isJoining.setValue(false);
             }
         });
+    }
+
+    public void resetJoinState() {
+        joinSuccess.setValue(false);
+        error.setValue(null);
     }
 
     @Override

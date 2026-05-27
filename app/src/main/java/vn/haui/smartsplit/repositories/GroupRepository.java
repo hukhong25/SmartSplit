@@ -62,13 +62,18 @@ public class GroupRepository {
         db.collection("groups").whereEqualTo("joinCode", code).get()
                 .addOnSuccessListener(snapshots -> {
                     if (!snapshots.isEmpty()) {
+                        Group group = snapshots.getDocuments().get(0).toObject(Group.class);
+                        if (group != null && group.getMemberIds() != null && group.getMemberIds().contains(userId)) {
+                            listener.onError(new Exception("ALREADY_MEMBER"));
+                            return;
+                        }
                         String groupId = snapshots.getDocuments().get(0).getId();
                         db.collection("groups").document(groupId)
                                 .update("memberIds", FieldValue.arrayUnion(userId))
                                 .addOnSuccessListener(v -> listener.onSuccess())
                                 .addOnFailureListener(listener::onError);
                     } else {
-                        listener.onError(new Exception("Invalid code"));
+                        listener.onError(new Exception("INVALID_CODE"));
                     }
                 })
                 .addOnFailureListener(listener::onError);

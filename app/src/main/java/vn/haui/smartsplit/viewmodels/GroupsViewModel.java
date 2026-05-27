@@ -19,10 +19,15 @@ public class GroupsViewModel extends ViewModel {
 
     private final MutableLiveData<List<Group>> groups = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<String> error = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> joinSuccess = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isJoining = new MutableLiveData<>(false);
+    
     private ListenerRegistration groupsListener;
 
     public LiveData<List<Group>> getGroups() { return groups; }
     public LiveData<String> getError() { return error; }
+    public LiveData<Boolean> getJoinSuccess() { return joinSuccess; }
+    public LiveData<Boolean> getIsJoining() { return isJoining; }
 
     public void loadGroups() {
         String uid = mAuth.getUid();
@@ -47,17 +52,25 @@ public class GroupsViewModel extends ViewModel {
         String uid = mAuth.getUid();
         if (uid == null) return;
 
+        isJoining.setValue(true);
         groupRepository.joinGroupWithCode(code, uid, new GroupRepository.OnActionListener() {
             @Override
             public void onSuccess() {
-                // Success handled by Firestore listener
+                joinSuccess.setValue(true);
+                isJoining.setValue(false);
             }
 
             @Override
             public void onError(Exception e) {
                 error.setValue(e.getMessage());
+                isJoining.setValue(false);
             }
         });
+    }
+
+    public void resetJoinState() {
+        joinSuccess.setValue(false);
+        error.setValue(null);
     }
 
     @Override

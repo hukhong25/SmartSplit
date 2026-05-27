@@ -71,9 +71,11 @@
                 </FrameLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilDisplayName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/display_name_hint"
+                    app:errorEnabled="true"
                     app:startIconDrawable="@android:drawable/ic_menu_edit"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 

@@ -2,10 +2,10 @@ package vn.haui.smartsplit.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -44,6 +45,9 @@ public class DashboardFragment extends Fragment {
     private TextView tvTotalOwe, tvTotalOwed, tvWelcome, tvSeeAllGroups;
     private ImageView ivNotification;
     private View viewNotifBadge;
+
+    private AlertDialog joinDialog;
+    private TextInputLayout tilJoinCodeDialog;
 
     @Nullable
     @Override
@@ -125,9 +129,26 @@ public class DashboardFragment extends Fragment {
         viewModel.getTotalOwed().observe(getViewLifecycleOwner(), owed -> 
             tvTotalOwed.setText(getString(R.string.currency_with_unit_format, formatter.format(owed))));
 
+        viewModel.getJoinSuccess().observe(getViewLifecycleOwner(), success -> {
+            if (success && joinDialog != null && joinDialog.isShowing()) {
+                joinDialog.dismiss();
+                viewModel.resetJoinState();
+            }
+        });
+
         viewModel.getError().observe(getViewLifecycleOwner(), errMsg -> {
             if (errMsg != null) {
-                Toast.makeText(requireContext(), errMsg, Toast.LENGTH_SHORT).show();
+                if (joinDialog != null && joinDialog.isShowing() && tilJoinCodeDialog != null) {
+                    if ("INVALID_CODE".equals(errMsg)) {
+                        tilJoinCodeDialog.setError(getString(R.string.toast_join_code_invalid));
+                    } else if ("ALREADY_MEMBER".equals(errMsg)) {
+                        tilJoinCodeDialog.setError(getString(R.string.toast_already_member));
+                    } else {
+                        tilJoinCodeDialog.setError(errMsg);
+                    }
+                } else {
+                    Toast.makeText(requireContext(), errMsg, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -145,17 +166,29 @@ public class DashboardFragment extends Fragment {
     }
 
     private void showJoinGroupDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(getString(R.string.dialog_join_group_title));
-        final EditText input = new EditText(requireContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
-        input.setHint(getString(R.string.dialog_join_group_hint));
-        builder.setView(input);
-        builder.setPositiveButton(getString(R.string.dialog_action_join), (dialog, which) -> {
-            String code = input.getText().toString().trim().toUpperCase();
-            if (!code.isEmpty()) viewModel.joinGroup(code);
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_join_group, null);
+        tilJoinCodeDialog = dialogView.findViewById(R.id.tilJoinCode);
+        EditText etJoinCode = dialogView.findViewById(R.id.etJoinCode);
+
+        joinDialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.dialog_join_group_title)
+                .setView(dialogView)
+                .setPositiveButton(R.string.dialog_action_join, null)
+                .setNegativeButton(R.string.dialog_action_cancel, (d, w) -> d.dismiss())
+                .create();
+
+        joinDialog.setOnShowListener(d -> {
+            Button btnJoin = joinDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            btnJoin.setOnClickListener(v -> {
+                String code = etJoinCode.getText().toString().trim().toUpperCase();
+                if (code.isEmpty()) {
+                    tilJoinCodeDialog.setError(getString(R.string.toast_missing_info));
+                } else {
+                    viewModel.joinGroup(code);
+                }
+            });
         });
-        builder.setNegativeButton(getString(R.string.dialog_action_cancel), (dialog, which) -> dialog.cancel());
-        builder.show();
+
+        joinDialog.show();
     }
 }

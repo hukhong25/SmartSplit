@@ -64,96 +64,70 @@ public class RegisterActivity extends BaseActivity {
     }
 
     private void setupValidation() {
-        etEmail.addTextChangedListener(new TextWatcher() {
+        TextWatcher commonWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
-                validateEmail(s.toString().trim());
+                // Clear errors when user types
+                tilDisplayName.setError(null);
+                tilEmail.setError(null);
+                tilPassword.setError(null);
+                tilConfirmPassword.setError(null);
             }
-        });
+        };
 
-        etPassword.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override
-            public void afterTextChanged(Editable s) {
-                validatePassword(s.toString().trim());
-            }
-        });
-
-        etConfirmPassword.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override
-            public void afterTextChanged(Editable s) {
-                validateConfirmPassword(s.toString().trim());
-            }
-        });
-    }
-
-    private boolean validateEmail(String email) {
-        if (email.isEmpty()) {
-            tilEmail.setError(getString(R.string.toast_missing_info));
-            return false;
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            tilEmail.setError(getString(R.string.error_invalid_email));
-            return false;
-        } else {
-            tilEmail.setError(null);
-            return true;
-        }
-    }
-
-    private boolean validatePassword(String password) {
-        if (password.isEmpty()) {
-            tilPassword.setError(getString(R.string.toast_missing_info));
-            return false;
-        } else if (password.length() < 6) {
-            tilPassword.setError(getString(R.string.error_password_too_short));
-            return false;
-        } else {
-            tilPassword.setError(null);
-            return true;
-        }
-    }
-
-    private boolean validateConfirmPassword(String confirmPassword) {
-        String password = etPassword.getText().toString().trim();
-        if (confirmPassword.isEmpty()) {
-            tilConfirmPassword.setError(getString(R.string.toast_missing_info));
-            return false;
-        } else if (!confirmPassword.equals(password)) {
-            tilConfirmPassword.setError(getString(R.string.error_password_mismatch));
-            return false;
-        } else {
-            tilConfirmPassword.setError(null);
-            return true;
-        }
+        etDisplayName.addTextChangedListener(commonWatcher);
+        etEmail.addTextChangedListener(commonWatcher);
+        etPassword.addTextChangedListener(commonWatcher);
+        etConfirmPassword.addTextChangedListener(commonWatcher);
     }
 
     private boolean validateAll() {
-        boolean isEmailValid = validateEmail(etEmail.getText().toString().trim());
-        boolean isPasswordValid = validatePassword(etPassword.getText().toString().trim());
-        boolean isConfirmValid = validateConfirmPassword(etConfirmPassword.getText().toString().trim());
-        boolean isNameValid = !etDisplayName.getText().toString().trim().isEmpty();
+        String name = etDisplayName.getText().toString().trim();
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
+        String confirm = etConfirmPassword.getText().toString().trim();
         
-        if (!isNameValid) tilDisplayName.setError(getString(R.string.toast_missing_info));
-        else tilDisplayName.setError(null);
+        boolean isValid = true;
 
-        return isEmailValid && isPasswordValid && isConfirmValid && isNameValid;
+        if (name.isEmpty()) {
+            tilDisplayName.setError(getString(R.string.toast_missing_info));
+            isValid = false;
+        }
+
+        if (email.isEmpty()) {
+            tilEmail.setError(getString(R.string.toast_missing_info));
+            isValid = false;
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            tilEmail.setError(getString(R.string.error_invalid_email));
+            isValid = false;
+        }
+
+        if (password.isEmpty()) {
+            tilPassword.setError(getString(R.string.toast_missing_info));
+            isValid = false;
+        } else if (password.length() < 6) {
+            tilPassword.setError(getString(R.string.error_password_too_short));
+            isValid = false;
+        }
+
+        if (confirm.isEmpty()) {
+            tilConfirmPassword.setError(getString(R.string.toast_missing_info));
+            isValid = false;
+        } else if (!confirm.equals(password)) {
+            tilConfirmPassword.setError(getString(R.string.error_password_mismatch));
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     private void observeViewModel() {
         viewModel.getFirebaseUser().observe(this, user -> {
             if (user != null) {
-                Toast.makeText(RegisterActivity.this, getString(R.string.toast_register_success), Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(RegisterActivity.this, HomeContainerActivity.class));
                 finishAffinity();
             }
@@ -161,7 +135,12 @@ public class RegisterActivity extends BaseActivity {
 
         viewModel.getError().observe(this, errMsg -> {
             if (errMsg != null) {
-                Toast.makeText(RegisterActivity.this, getString(R.string.toast_register_failed_prefix, errMsg), Toast.LENGTH_SHORT).show();
+                // Show Firebase error on UI
+                if (errMsg.contains("email") || errMsg.contains("already in use")) {
+                    tilEmail.setError(getString(R.string.toast_register_failed_prefix, errMsg));
+                } else {
+                    tilDisplayName.setError(getString(R.string.toast_register_failed_prefix, errMsg));
+                }
             }
         });
 

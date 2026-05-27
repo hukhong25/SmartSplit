@@ -59,10 +59,12 @@
 
         <!-- Email field -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="@string/email_hint"
+            app:errorEnabled="true"
             style="@style/Widget.SmartSplit.TextInput">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -75,11 +77,13 @@
 
         <!-- Password field -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="28dp"
             android:hint="@string/password_hint"
             app:passwordToggleEnabled="true"
+            app:errorEnabled="true"
             style="@style/Widget.SmartSplit.TextInput">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -98,6 +102,18 @@
             android:layout_height="52dp"
             android:text="@string/login_btn"
             android:layout_marginBottom="12dp"/>
+
+        <!-- General Error TextView at the bottom of the form -->
+        <TextView
+            android:id="@+id/tvGeneralError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#B00020"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp"
+            android:gravity="center"/>
 
         <ProgressBar
             android:id="@+id/progressBar"

@@ -2,6 +2,8 @@ package vn.haui.smartsplit;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -15,11 +17,14 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
+import vn.haui.smartsplit.utils.ImageUtils;
 import vn.haui.smartsplit.viewmodels.ProfileViewModel;
 
 public class EditProfileActivity extends BaseActivity {
 
+    private TextInputLayout tilDisplayName;
     private TextInputEditText etDisplayName;
     private ImageView ivAvatar;
     private TextView tvAvatarInitial;
@@ -54,6 +59,7 @@ public class EditProfileActivity extends BaseActivity {
             toolbar.setNavigationOnClickListener(v -> finish());
         }
 
+        tilDisplayName = findViewById(R.id.tilDisplayName);
         ivAvatar = findViewById(R.id.ivAvatar);
         tvAvatarInitial = findViewById(R.id.tvAvatarInitial);
         etDisplayName = findViewById(R.id.etDisplayName);
@@ -62,6 +68,7 @@ public class EditProfileActivity extends BaseActivity {
         progressBar = findViewById(R.id.progressBar);
         View frameAvatar = findViewById(R.id.frameAvatar);
 
+        setupValidation();
         observeViewModel();
         viewModel.loadUserProfile();
 
@@ -70,12 +77,23 @@ public class EditProfileActivity extends BaseActivity {
         btnCancel.setOnClickListener(v -> finish());
     }
 
+    private void setupValidation() {
+        etDisplayName.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                tilDisplayName.setError(null);
+            }
+        });
+    }
+
     private void observeViewModel() {
         viewModel.getUser().observe(this, user -> {
             if (user != null) {
                 etDisplayName.setText(user.getName());
                 if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
-                    vn.haui.smartsplit.utils.ImageUtils.loadImage(this, user.getPhotoUrl(), ivAvatar, 0);
+                    ImageUtils.loadImage(this, user.getPhotoUrl(), ivAvatar, 0);
                     tvAvatarInitial.setVisibility(View.GONE);
                 } else {
                     tvAvatarInitial.setVisibility(View.VISIBLE);
@@ -96,7 +114,7 @@ public class EditProfileActivity extends BaseActivity {
 
         viewModel.getError().observe(this, err -> {
             if (err != null) {
-                Toast.makeText(this, getString(R.string.toast_error_prefix, err), Toast.LENGTH_SHORT).show();
+                tilDisplayName.setError(getString(R.string.toast_error_prefix, err));
             }
         });
 
@@ -110,13 +128,13 @@ public class EditProfileActivity extends BaseActivity {
         String newName = etDisplayName.getText().toString().trim();
 
         if (newName.isEmpty()) {
-            etDisplayName.setError(getString(R.string.error_empty_display_name));
+            tilDisplayName.setError(getString(R.string.error_empty_display_name));
             return;
         }
 
         String base64Image = null;
         if (selectedImageUri != null) {
-            base64Image = vn.haui.smartsplit.utils.ImageUtils.convertUriToBase64(getContentResolver(), selectedImageUri, 300);
+            base64Image = ImageUtils.convertUriToBase64(getContentResolver(), selectedImageUri, 300);
             if (base64Image == null) {
                 Toast.makeText(this, getString(R.string.toast_image_processing_error), Toast.LENGTH_SHORT).show();
                 return;

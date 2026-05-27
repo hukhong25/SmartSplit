@@ -1,6 +1,9 @@
 package vn.haui.smartsplit;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -23,6 +27,7 @@ import vn.haui.smartsplit.viewmodels.CreateGroupViewModel;
 
 public class CreateGroupActivity extends BaseActivity {
 
+    private TextInputLayout tilGroupName, tilMemberEmail;
     private EditText etGroupName, etMemberEmail;
     private Button btnCreateGroup, btnAddMember;
     private RecyclerView rvAddedMembers;
@@ -47,6 +52,8 @@ public class CreateGroupActivity extends BaseActivity {
             }
         }
 
+        tilGroupName = findViewById(R.id.tilGroupName);
+        tilMemberEmail = findViewById(R.id.tilMemberEmail);
         etGroupName = findViewById(R.id.etGroupName);
         etMemberEmail = findViewById(R.id.etMemberEmail);
         btnCreateGroup = findViewById(R.id.btnCreateGroup);
@@ -55,25 +62,72 @@ public class CreateGroupActivity extends BaseActivity {
         progressBar = findViewById(R.id.progressBar);
 
         setupRecyclerView();
+        setupValidation();
         observeViewModel();
 
         btnAddMember.setOnClickListener(v -> {
             String email = etMemberEmail.getText().toString().trim();
-            if (!email.isEmpty()) {
+            if (validateMemberEmail(email)) {
                 viewModel.addMemberByEmail(email);
-            } else {
-                Toast.makeText(this, R.string.toast_missing_email, Toast.LENGTH_SHORT).show();
             }
         });
 
         btnCreateGroup.setOnClickListener(v -> {
             String groupName = etGroupName.getText().toString().trim();
             if (groupName.isEmpty()) {
-                Toast.makeText(this, R.string.toast_missing_group_name, Toast.LENGTH_SHORT).show();
+                tilGroupName.setError(getString(R.string.toast_missing_group_name));
             } else {
                 viewModel.createGroup(groupName);
             }
         });
+    }
+
+    private void setupValidation() {
+        etGroupName.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                tilGroupName.setError(null);
+            }
+        });
+
+        etMemberEmail.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                tilMemberEmail.setError(null);
+            }
+        });
+    }
+
+    private boolean validateMemberEmail(String email) {
+        if (email.isEmpty()) {
+            tilMemberEmail.setError(getString(R.string.toast_missing_email));
+            return false;
+        }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            tilMemberEmail.setError(getString(R.string.error_invalid_email));
+            return false;
+        }
+        
+        // Kiểm tra xem đã có trong danh sách chưa
+        for (User u : addedMembersList) {
+            if (u.getEmail().equalsIgnoreCase(email)) {
+                tilMemberEmail.setError(getString(R.string.toast_user_already_in_list));
+                return false;
+            }
+        }
+
+        // Kiểm tra có phải chính mình không
+        String myEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        if (myEmail != null && myEmail.equalsIgnoreCase(email)) {
+            tilMemberEmail.setError(getString(R.string.toast_already_member));
+            return false;
+        }
+
+        return true;
     }
 
     private void setupRecyclerView() {
@@ -100,6 +154,7 @@ public class CreateGroupActivity extends BaseActivity {
             addedMembersList.addAll(users);
             memberAdapter.notifyDataSetChanged();
             etMemberEmail.setText("");
+            tilMemberEmail.setError(null);
         });
 
         viewModel.getCreateSuccess().observe(this, success -> {
@@ -111,7 +166,11 @@ public class CreateGroupActivity extends BaseActivity {
 
         viewModel.getError().observe(this, err -> {
             if (err != null) {
-                Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
+                if (err.contains("email") || err.contains("user")) {
+                    tilMemberEmail.setError(err);
+                } else {
+                    tilGroupName.setError(err);
+                }
             }
         });
 

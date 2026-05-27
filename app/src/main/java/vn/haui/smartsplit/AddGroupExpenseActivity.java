@@ -1,6 +1,9 @@
 package vn.haui.smartsplit;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
@@ -9,18 +12,24 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -31,28 +40,44 @@ import java.util.Locale;
 
 import vn.haui.smartsplit.adapters.SplitMemberAdapter;
 import vn.haui.smartsplit.models.User;
+import vn.haui.smartsplit.utils.ImageUtils;
 import vn.haui.smartsplit.viewmodels.AddGroupExpenseViewModel;
 
 public class AddGroupExpenseActivity extends BaseActivity {
 
+    private TextInputLayout tilExpenseDescription, tilExpenseAmount;
     private EditText etExpenseDescription, etExpenseAmount;
     private Spinner spPayer;
     private CheckBox cbSelectAll;
     private ChipGroup cgCategories;
     private RecyclerView rvSplitMembers;
-    private Button btnSaveGroupExpense;
+    private TextView tvSplitError;
+    private Button btnSaveGroupExpense, btnPickImage;
+    private ImageView ivProofPreview;
     private ProgressBar pbLoading;
 
     private AddGroupExpenseViewModel viewModel;
     private String groupId;
     private String expenseId;
     private boolean isEditMode = false;
+    private Uri imageUri;
 
     private final List<User> memberList = new ArrayList<>();
     private final List<String> selectedUserIds = new ArrayList<>();
     private SplitMemberAdapter splitMemberAdapter;
 
     private String currentAmount = "";
+
+    private final ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    imageUri = result.getData().getData();
+                    ivProofPreview.setVisibility(View.VISIBLE);
+                    Glide.with(this).load(imageUri).into(ivProofPreview);
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,13 +98,18 @@ public class AddGroupExpenseActivity extends BaseActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
+        tilExpenseDescription = findViewById(R.id.tilExpenseDescription);
+        tilExpenseAmount = findViewById(R.id.tilExpenseAmount);
         etExpenseDescription = findViewById(R.id.etExpenseDescription);
         etExpenseAmount = findViewById(R.id.etExpenseAmount);
         spPayer = findViewById(R.id.spPayer);
         cbSelectAll = findViewById(R.id.cbSelectAll);
         cgCategories = findViewById(R.id.cgCategories);
         rvSplitMembers = findViewById(R.id.rvSplitMembers);
+        tvSplitError = findViewById(R.id.tvSplitError);
         btnSaveGroupExpense = findViewById(R.id.btnSaveGroupExpense);
+        btnPickImage = findViewById(R.id.btnPickImage);
+        ivProofPreview = findViewById(R.id.ivProofPreview);
         pbLoading = findViewById(R.id.progressBar);
 
         if (isEditMode) {
@@ -100,32 +130,32 @@ public class AddGroupExpenseActivity extends BaseActivity {
     }
 
     private void setupListeners() {
-        // Category Selection - Auto fill description if empty
         cgCategories.setOnCheckedStateChangeListener((group, checkedIds) -> {
             if (checkedIds.isEmpty()) return;
             int id = checkedIds.get(0);
             String currentDesc = etExpenseDescription.getText().toString().trim();
-            
-            // Nếu mô tả đang trống hoặc chỉ chứa tên danh mục cũ, cập nhật theo chip mới chọn
             if (currentDesc.isEmpty()) {
                 Chip chip = findViewById(id);
                 etExpenseDescription.setText(chip.getText().toString());
             }
         });
 
-        // Currency Formatter
+        etExpenseDescription.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                tilExpenseDescription.setError(null);
+            }
+        });
+
         etExpenseAmount.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
+                tilExpenseAmount.setError(null);
                 if (!s.toString().equals(currentAmount)) {
                     etExpenseAmount.removeTextChangedListener(this);
-
                     String cleanString = s.toString().replaceAll("[.,]", "");
                     if (!cleanString.isEmpty()) {
                         try {
@@ -133,7 +163,6 @@ public class AddGroupExpenseActivity extends BaseActivity {
                             DecimalFormat formatter = (DecimalFormat) DecimalFormat.getInstance(Locale.GERMANY);
                             formatter.applyPattern("#,###,###,###");
                             String formatted = formatter.format(parsed);
-
                             currentAmount = formatted;
                             etExpenseAmount.setText(formatted);
                             etExpenseAmount.setSelection(formatted.length());
@@ -141,13 +170,16 @@ public class AddGroupExpenseActivity extends BaseActivity {
                     } else {
                         currentAmount = "";
                     }
-
                     etExpenseAmount.addTextChangedListener(this);
                 }
             }
         });
 
-        // Quick Split (Select All)
+        btnPickImage.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            pickImageLauncher.launch(intent);
+        });
+
         cbSelectAll.setOnClickListener(v -> {
             boolean checked = cbSelectAll.isChecked();
             selectedUserIds.clear();
@@ -156,6 +188,7 @@ public class AddGroupExpenseActivity extends BaseActivity {
                     selectedUserIds.add(user.getUid());
                 }
             }
+            tvSplitError.setVisibility(View.GONE);
             splitMemberAdapter.notifyDataSetChanged();
         });
 
@@ -167,48 +200,43 @@ public class AddGroupExpenseActivity extends BaseActivity {
             memberList.clear();
             memberList.addAll(users);
             updatePayerSpinner();
-            
             if (!isEditMode && selectedUserIds.isEmpty()) {
                 for (User u : users) selectedUserIds.add(u.getUid());
                 cbSelectAll.setChecked(true);
             } else if (isEditMode) {
                 cbSelectAll.setChecked(selectedUserIds.size() == users.size() && users.size() > 0);
             }
-            
             splitMemberAdapter.notifyDataSetChanged();
         });
 
         viewModel.getExpenseData().observe(this, expense -> {
             if (expense != null) {
                 etExpenseDescription.setText(expense.getDescription());
-                
                 DecimalFormat formatter = (DecimalFormat) DecimalFormat.getInstance(Locale.GERMANY);
                 formatter.applyPattern("#,###,###,###");
                 String formatted = formatter.format(expense.getAmount());
                 etExpenseAmount.setText(formatted);
                 currentAmount = formatted;
-
-                // Set Category Chip
                 setCategoryChip(expense.getCategory());
                 
-                // Select Payer
+                if (expense.getProofImageUrl() != null && !expense.getProofImageUrl().isEmpty()) {
+                    ivProofPreview.setVisibility(View.VISIBLE);
+                    Glide.with(this).load(expense.getProofImageUrl()).into(ivProofPreview);
+                }
+
                 for (int i = 0; i < memberList.size(); i++) {
                     if (memberList.get(i).getUid().equals(expense.getPayerId())) {
                         spPayer.setSelection(i);
                         break;
                     }
                 }
-
-                // Select split members
                 selectedUserIds.clear();
                 if (expense.getSplitDetails() != null) {
                     selectedUserIds.addAll(expense.getSplitDetails().keySet());
                 }
-                
                 if (memberList.size() > 0) {
                     cbSelectAll.setChecked(selectedUserIds.size() == memberList.size());
                 }
-                
                 splitMemberAdapter.notifyDataSetChanged();
             }
         });
@@ -223,7 +251,7 @@ public class AddGroupExpenseActivity extends BaseActivity {
 
         viewModel.getError().observe(this, err -> {
             if (err != null) {
-                Toast.makeText(this, getString(R.string.toast_error_prefix, err), Toast.LENGTH_SHORT).show();
+                tilExpenseDescription.setError(getString(R.string.toast_error_prefix, err));
             }
         });
 
@@ -274,14 +302,30 @@ public class AddGroupExpenseActivity extends BaseActivity {
     private void saveExpense() {
         String desc = etExpenseDescription.getText().toString().trim();
         String amountStr = etExpenseAmount.getText().toString().trim().replaceAll("[.,]", "");
+        boolean isValid = true;
 
-        if (desc.isEmpty() || amountStr.isEmpty()) {
-            Toast.makeText(this, getString(R.string.toast_missing_info), Toast.LENGTH_SHORT).show();
-            return;
+        if (desc.isEmpty()) {
+            tilExpenseDescription.setError(getString(R.string.toast_missing_info));
+            isValid = false;
+        }
+        if (amountStr.isEmpty()) {
+            tilExpenseAmount.setError(getString(R.string.toast_missing_info));
+            isValid = false;
         }
         if (selectedUserIds.isEmpty()) {
-            Toast.makeText(this, getString(R.string.toast_missing_split_members), Toast.LENGTH_SHORT).show();
-            return;
+            tvSplitError.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+
+        if (!isValid) return;
+
+        String base64Image = null;
+        if (imageUri != null) {
+            base64Image = ImageUtils.convertUriToBase64(getContentResolver(), imageUri, 600);
+            if (base64Image == null) {
+                Toast.makeText(this, getString(R.string.toast_image_processing_error), Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
         try {
@@ -290,11 +334,11 @@ public class AddGroupExpenseActivity extends BaseActivity {
             String id = isEditMode ? expenseId : FirebaseFirestore.getInstance().collection("expenses").document().getId();
             String category = getSelectedCategory();
             
-            viewModel.saveExpense(id, desc, amount, payer, groupId, selectedUserIds, FirebaseAuth.getInstance().getUid(), category,
+            viewModel.saveExpense(id, desc, amount, payer, groupId, selectedUserIds, FirebaseAuth.getInstance().getUid(), category, base64Image,
                     getString(R.string.notif_title_new_expense),
                     getString(R.string.notif_content_new_expense_format));
         } catch (NumberFormatException e) {
-            Toast.makeText(this, getString(R.string.toast_invalid_amount), Toast.LENGTH_SHORT).show();
+            tilExpenseAmount.setError(getString(R.string.toast_invalid_amount));
         }
     }
 
@@ -307,6 +351,9 @@ public class AddGroupExpenseActivity extends BaseActivity {
     public void updateSelectAllState() {
         if (cbSelectAll != null) {
             cbSelectAll.setChecked(selectedUserIds.size() == memberList.size() && !memberList.isEmpty());
+        }
+        if (!selectedUserIds.isEmpty()) {
+            tvSplitError.setVisibility(View.GONE);
         }
     }
 }

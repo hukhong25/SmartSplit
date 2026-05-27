@@ -45,6 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="@string/full_name_hint"
+            app:errorEnabled="true"
             style="@style/Widget.SmartSplit.TextInput">
 
             <com.google.android.material.textfield.TextInputEditText

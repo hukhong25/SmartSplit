@@ -93,9 +93,11 @@
                 </HorizontalScrollView>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilExpenseDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="8dp"
+                    app:errorEnabled="true"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -106,10 +108,12 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilExpenseAmount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="8dp"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    app:errorEnabled="true"
                     app:suffixText="VND">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -135,7 +139,35 @@
                     android:layout_height="wrap_content"
                     android:padding="12dp"
                     android:background="@android:drawable/btn_dropdown"
-                    android:layout_marginBottom="24dp" />
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Proof Image Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/proof_optional_label"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="8dp" />
+
+                <Button
+                    android:id="@+id/btnPickImage"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pick_image_btn"
+                    android:layout_marginBottom="8dp"/>
+
+                <ImageView
+                    android:id="@+id/ivProofPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:scaleType="centerInside"
+                    android:layout_marginBottom="16dp"
+                    android:visibility="gone"
+                    android:background="#EEEEEE"
+                    android:contentDescription="@string/proof_preview_desc"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -166,7 +198,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
-                    android:layout_marginBottom="32dp"
+                    android:layout_marginBottom="4dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="2dp">
 
@@ -177,6 +209,16 @@
                         android:padding="4dp" />
                 </androidx.cardview.widget.CardView>
 
+                <TextView
+                    android:id="@+id/tvSplitError"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/toast_missing_split_members"
+                    android:textColor="#B00020"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    android:layout_marginBottom="16dp" />
+
                 <Button
                     android:id="@+id/btnSaveGroupExpense"
                     android:layout_width="match_parent"
@@ -185,7 +227,8 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:backgroundTint="@color/colorPrimary"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:layout_marginTop="8dp"/>
 
             </LinearLayout>
         </ScrollView>
